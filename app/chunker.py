@@ -1,8 +1,3 @@
-"""
-ADOBE CONFIDENTIAL
-Copyright 2026 Adobe. All Rights Reserved.
-"""
-
 from dataclasses import dataclass
 
 DEFAULT_CHUNK_WORD_SIZE = 180

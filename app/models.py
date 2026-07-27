@@ -1,8 +1,3 @@
-"""
-ADOBE CONFIDENTIAL
-Copyright 2026 Adobe. All Rights Reserved.
-"""
-
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field

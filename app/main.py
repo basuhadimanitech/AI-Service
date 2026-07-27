@@ -1,7 +1,4 @@
 """
-ADOBE CONFIDENTIAL
-Copyright 2026 Adobe. All Rights Reserved.
-
 AI Q&A service for CaptivateNext runtime: retrieval-augmented Q&A over
 course slide content. Runs on shared infrastructure inside the Adobe
 network - CPRuntime calls this instead of embedding/running an LLM

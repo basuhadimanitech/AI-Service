@@ -1,7 +1,4 @@
 """
-ADOBE CONFIDENTIAL
-Copyright 2026 Adobe. All Rights Reserved.
-
 Per-project embedded-chunk store, one SQLite database per project
 (`<data_dir>/<project_id>.db`), mirroring the one-IndexedDB-per-project
 design the runtime used when everything ran in the browser. Records are

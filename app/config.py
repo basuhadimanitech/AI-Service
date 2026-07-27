@@ -1,8 +1,3 @@
-"""
-ADOBE CONFIDENTIAL
-Copyright 2026 Adobe. All Rights Reserved.
-"""
-
 import os
 from pathlib import Path
 

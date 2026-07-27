@@ -1,7 +1,4 @@
 """
-ADOBE CONFIDENTIAL
-Copyright 2026 Adobe. All Rights Reserved.
-
 Thin async client for the shared Ollama server. See
 https://github.com/ollama/ollama/blob/main/docs/api.md
 """
