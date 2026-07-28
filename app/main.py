@@ -1,9 +1,7 @@
 """
 AI Q&A service for CaptivateNext runtime: retrieval-augmented Q&A over
-course slide content. Runs on shared infrastructure inside the Adobe
-network - CPRuntime calls this instead of embedding/running an LLM
-in-browser via a per-learner local Ollama install. Content still never
-leaves the Adobe environment, it just no longer requires that install.
+course slide content, backed by the OpenAI API instead of a per-learner
+local LLM install.
 """
 
 import json
@@ -23,8 +21,9 @@ from app.models import (
     StaleCheckRequest,
     StaleCheckResponse,
 )
-from app.ollama_client import OllamaClient, OllamaUnreachableError
+from app.llm_client import LLMClient, LLMUnreachableError
 from app.vector_store import StoredChunk, get_vector_store
+import httpx
 
 logger = logging.getLogger("cpai")
 
@@ -37,23 +36,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ollama = OllamaClient()
+llm = LLMClient()
 
 
-@app.exception_handler(OllamaUnreachableError)
-async def _ollama_unreachable_handler(_request, exc: OllamaUnreachableError) -> JSONResponse:
-    logger.warning("Ollama unreachable: %s", exc)
+@app.exception_handler(LLMUnreachableError)
+async def _llm_unreachable_handler(_request, exc: LLMUnreachableError) -> JSONResponse:
+    logger.warning("OpenAI API unreachable: %s", exc)
     return JSONResponse(status_code=503, content={"detail": str(exc)})
 
 
 @app.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
-    reachable = await ollama.is_reachable()
-    return HealthResponse(status="ok" if reachable else "degraded", ollama_reachable=reachable)
+    reachable = await llm.is_reachable()
+    return HealthResponse(status="ok" if reachable else "degraded", llm_reachable=reachable)
 
 @app.get("/test")
-def test():
-    return "Test"
+async def test():
+     async with httpx.AsyncClient() as client:
+         return client
+
+
+
 
 
 @app.post("/projects/{project_id}/stale-check", response_model=StaleCheckResponse)
@@ -71,10 +74,10 @@ async def index_slide(project_id: str, slide_id: str, body: IndexSlideRequest) -
     captions: list[str] = []
     for image_base64 in body.images:
         try:
-            caption = await ollama.caption(image_base64)
+            caption = await llm.caption(image_base64)
             if caption:
                 captions.append(caption)
-        except (OllamaUnreachableError, RuntimeError):
+        except (LLMUnreachableError, RuntimeError):
             # Skip images that fail to caption rather than failing the
             # whole slide's indexing.
             logger.warning("Caption failed for slide %s in project %s", slide_id, project_id)
@@ -84,7 +87,7 @@ async def index_slide(project_id: str, slide_id: str, body: IndexSlideRequest) -
 
     stored_chunks: list[StoredChunk] = []
     for chunk in chunks:
-        embedding = await ollama.embed(chunk.text)
+        embedding = await llm.embed(chunk.text)
         stored_chunks.append(
             StoredChunk(
                 slide_id=chunk.slide_id,
@@ -107,7 +110,7 @@ async def ask(project_id: str, body: AskRequest) -> StreamingResponse:
             status_code=409, detail="No indexed slide content available to answer questions from."
         )
 
-    query_embedding = await ollama.embed(body.question)
+    query_embedding = await llm.embed(body.question)
     top_chunks = store.search(query_embedding, settings.top_k_chunks)
     context = "\n\n".join(
         f"[{i + 1}] (Slide {chunk.slide_id}) {chunk.text}" for i, chunk in enumerate(top_chunks)
@@ -128,7 +131,7 @@ async def ask(project_id: str, body: AskRequest) -> StreamingResponse:
     source_slide_ids = list(dict.fromkeys(chunk.slide_id for chunk in top_chunks))
 
     async def _stream():
-        async for token in ollama.chat_stream(messages):
+        async for token in llm.chat_stream(messages):
             yield json.dumps({"token": token}) + "\n"
         yield json.dumps({"done": True, "sourceSlideIds": source_slide_ids}) + "\n"
 

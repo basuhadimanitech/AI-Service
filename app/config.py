@@ -1,15 +1,15 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 class Settings:
-    # Ollama now runs on a shared host inside the Adobe network rather than
-    # on the learner's machine - content still never leaves the Adobe
-    # environment, it just no longer requires a per-learner local install.
-    ollama_host: str = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
-    embed_model: str = os.environ.get("AI_EMBED_MODEL", "nomic-embed-text")
-    chat_model: str = os.environ.get("AI_CHAT_MODEL", "llama3.2")
-    vision_model: str = os.environ.get("AI_VISION_MODEL", "llava")
+    openai_api_key: str = os.environ.get("OPENAI_API_KEY", "")
+    embed_model: str = os.environ.get("AI_EMBED_MODEL", "text-embedding-3-small")
+    chat_model: str = os.environ.get("AI_CHAT_MODEL", "gpt-4o-mini")
 
     data_dir: Path = Path(os.environ.get("AI_DATA_DIR", str(Path(__file__).parent.parent / "data")))
 

@@ -43,4 +43,4 @@ class AskRequest(CamelModel):
 
 class HealthResponse(CamelModel):
     status: Literal["ok", "degraded"]
-    ollama_reachable: bool = Field(alias="ollamaReachable")
+    llm_reachable: bool = Field(alias="llmReachable")
