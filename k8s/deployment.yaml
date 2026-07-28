@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: cpai-service
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: cpai-service
+
+  template:
+    metadata:
+      labels:
+        app: cpai-service
+
+    spec:
+      containers:
+        - name: cpai-service
+
+          image: basuaiacr.azurecr.io/cpai-service:v1
+
+          ports:
+            - containerPort: 8008
+
+          env:
+            - name: AI_DATA_DIR
+              value: /data
