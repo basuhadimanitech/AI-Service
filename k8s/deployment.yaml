@@ -20,7 +20,7 @@ spec:
       containers:
         - name: cpai-service
 
-          image: basuaiacr.azurecr.io/cpai-service:v1
+          image: basuaiacr.azurecr.io/cpai-service:v2
 
           ports:
             - containerPort: 8008
