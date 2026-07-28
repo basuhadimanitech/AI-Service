@@ -53,6 +53,7 @@ async def health() -> HealthResponse:
 @app.get("/test")
 async def test():
      async with httpx.AsyncClient() as client:
+         print("hello")
          return client
 
 
