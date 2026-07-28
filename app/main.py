@@ -51,6 +51,10 @@ async def health() -> HealthResponse:
     reachable = await ollama.is_reachable()
     return HealthResponse(status="ok" if reachable else "degraded", ollama_reachable=reachable)
 
+@app.get("/test")
+def test():
+    return "Test"
+
 
 @app.post("/projects/{project_id}/stale-check", response_model=StaleCheckResponse)
 async def stale_check(project_id: str, body: StaleCheckRequest) -> StaleCheckResponse:
