@@ -28,3 +28,8 @@ spec:
           env:
             - name: AI_DATA_DIR
               value: /data
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-secret
+                  key: OPENAI_API_KEY  

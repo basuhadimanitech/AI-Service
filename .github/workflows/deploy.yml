@@ -42,9 +42,15 @@ jobs:
           --name cpai-cluster \
           --overwrite-existing
 
+    - name: Create/Update Kubernetes Secret
+      run: |
+        kubectl create secret generic openai-secret \
+          --from-literal=OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+          --dry-run=client -o yaml | kubectl apply -f -
+
     - name: Deploy
       run: |
         kubectl set image deployment/cpai-service \
-        cpai-service=$REGISTRY/$IMAGE_NAME:${{ github.sha }}
+          cpai-service=$REGISTRY/$IMAGE_NAME:${{ github.sha }}
 
-        kubectl rollout status deployment/cpai-service
+        kubectl rollout status deployment/cpai-service        
